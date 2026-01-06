@@ -1017,6 +1017,9 @@ type Task = {
   id: number
   title: string
   completed: boolean
+  due_date?: string
+  priority?: string
+  context?: string
 }
 
 // ✅ NEW: backend URL
@@ -1080,7 +1083,10 @@ const [summaries, setSummaries] = useState<any[]>([])
           (t: any, index: number) => ({
             id: index + 1,
             title: t.title,
-            completed: t.completed
+            completed: t.completed,
+            due_date:t.due_date,
+            priority:t.priority,
+            context:t.context
           })
         )
 
