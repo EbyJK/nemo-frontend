@@ -1,5 +1,6 @@
 const { app, BrowserWindow, screen } = require('electron')
-
+const { ipcMain } = require('electron')
+const path = require('path')
 let win
 app.setAppUserModelId('com.nemo.mailsidebar')
 
@@ -17,11 +18,22 @@ const path = require('path')
     icon: path.join(__dirname, '../assets/icon.ico'),
     skipTaskbar: false,       // Allows pinning
     webPreferences: {
-      preload: __dirname + '/preload.js'
+      // preload: __dirname + '/preload.js'
+       preload: path.join(__dirname, 'preload.js')
     }
   })
 
   // win.loadFile(__dirname + '/index.html')
   win.loadURL('http://localhost:3000')
 
+})
+
+ipcMain.on('window:minimize', () => {
+  // mainWindow.minimize()
+   if (win) win.minimize()
+})
+
+ipcMain.on('window:close', () => {
+  // mainWindow.close()
+  if (win) win.close()
 })

@@ -1137,7 +1137,7 @@ const [summaries, setSummaries] = useState<any[]>([])
   return (
     <div className="h-screen w-full bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">
       {/* HEADER */}
-      <header className="flex items-center justify-between p-4 border-b dark:border-zinc-700">
+      <header className="flex items-center justify-between p-4 border-b dark:border-zinc-700" style={{ WebkitAppRegion: 'drag' }as React.CSSProperties}>
         <div className="flex items-center gap-2">
           <img
             src={logo}
@@ -1148,11 +1148,41 @@ const [summaries, setSummaries] = useState<any[]>([])
             NEMO
           </span>
         </div>
+         
+<div className="flex items-center gap-2">
+  {/* Minimize */}
+  <button
+    onClick={() => window.electronAPI?.minimize()}
+    style={{ WebkitAppRegion: 'no-drag' }as React.CSSProperties}
+    title="Minimize"
+    className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800"
+  >
+    —
+  </button>
+
+  {/* Close */}
+  <button
+    onClick={() => window.electronAPI?.close()}
+    style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+
+    title="Close"
+    className="p-1 rounded hover:bg-red-200 dark:hover:bg-red-800"
+  >
+    ×
+  </button>
+</div>
+
+
+
+
+
 
         <div className="flex items-center gap-3">
           {/* Logout */}
           <button
             onClick={handleLogout}
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+
             title="Logout"
             className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800"
           >
@@ -1171,6 +1201,8 @@ const [summaries, setSummaries] = useState<any[]>([])
           {/* Theme toggle */}
           <button
             onClick={() => setDarkMode(!darkMode)}
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+
             className="relative w-11 h-6 rounded-full bg-zinc-300 dark:bg-zinc-700 transition-colors"
           >
             <span
@@ -1274,6 +1306,8 @@ function SectionHeader({
   return (
     <button
       onClick={onClick}
+      style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+
       className={`w-full flex justify-between items-center px-3 py-2 rounded-lg text-sm font-medium
         ${open
           ? 'bg-zinc-200 dark:bg-zinc-800'

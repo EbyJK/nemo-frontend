@@ -133,7 +133,11 @@
 //   )
 // }
 
+
+
 import { useState } from 'react'
+const BACKEND_URL = 'http://127.0.0.1:8000'
+
 type Task = {
   id: number
   title: string
@@ -222,9 +226,43 @@ export function TodoList({
       {task.context}
     </span>
   )}
+  {mode === 'active' && task.due_date && (
+  <button
+    onClick={() => pushToCalendar(task)}
+    className="self-start mt-1 text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
+  >
+    Push to Calendar
+  </button>
+)}
+
 </li>
 
       ))}
     </div>
   )
+}
+
+async function pushToCalendar(task: Task) {
+  try {
+    const res = await fetch(`${BACKEND_URL}/calendar/push`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        title: task.title,
+        due_date: task.due_date
+      })
+    })
+
+    const data = await res.json()
+
+    if (data.event_link) {
+      window.open(data.event_link, '_blank')
+    } else {
+      console.error('Calendar push failed', data)
+    }
+  } catch (err) {
+    console.error('Calendar error', err)
+  }
 }
