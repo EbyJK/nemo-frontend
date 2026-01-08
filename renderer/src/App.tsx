@@ -1022,6 +1022,12 @@ type Task = {
   context?: string
 }
 
+type Summary = {
+  
+  summary: string
+  confidence?: number
+}
+
 // ✅ NEW: backend URL
 const BACKEND_URL = 'http://127.0.0.1:8000'
 
@@ -1030,6 +1036,7 @@ export default function App() {
   /* ---------------- AUTH ---------------- */
   const [user, setUser] = useState<User | null>(null)
   const [authChecked, setAuthChecked] = useState(false)
+   const [googleConnected, setGoogleConnected] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -1057,7 +1064,9 @@ export default function App() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [summaryCount, setSummaryCount] = useState(0)
   const [loading, setLoading] = useState(true)
-const [summaries, setSummaries] = useState<any[]>([])
+// const [summaries, setSummaries] = useState<any[]>([])
+
+const [summaries, setSummaries] = useState<Summary[]>([])
 
 
   useEffect(() => {
@@ -1074,6 +1083,11 @@ const [summaries, setSummaries] = useState<any[]>([])
           fetch(`${BACKEND_URL}/tasks?completed=false`),
           fetch(`${BACKEND_URL}/summaries`)
         ])
+
+        const statusRes = await fetch(`${BACKEND_URL}/calendar/status`)
+        const statusData = await statusRes.json()
+        setGoogleConnected(statusData.connected)
+
 
         const rawTasks = await tasksRes.json()
         const rawSummaries = await summariesRes.json()
@@ -1150,6 +1164,15 @@ const [summaries, setSummaries] = useState<any[]>([])
         </div>
          
 <div className="flex items-center gap-2">
+  <button
+  onClick={() => window.electronAPI?.toggleAlwaysOnTop()}
+  style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+  title="Toggle always on top"
+  className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800"
+>
+  📌
+</button>
+
   {/* Minimize */}
   <button
     onClick={() => window.electronAPI?.minimize()}
@@ -1252,9 +1275,17 @@ const [summaries, setSummaries] = useState<any[]>([])
               <EmailCard key={i} />
             ))} */}
 
-            {summaries.map((s) => (
+            {/* {summaries.map((s) => (
   <EmailCard key={s.id} summary={s.summary} />
+))} */}   
+{summaries.map((s, i) => (
+  <EmailCard
+    key={i}
+    summary={s.summary}
+    confidence={s.confidence}
+  />
 ))}
+
 
           </div>
         )}
@@ -1265,12 +1296,35 @@ const [summaries, setSummaries] = useState<any[]>([])
           open={activeSection === 'active'}
           onClick={() => setActiveSection('active')}
         />
+        {!googleConnected && (
+  <div className="mb-3 p-3 rounded-lg bg-blue-50 dark:bg-zinc-800 border border-blue-200 dark:border-zinc-700">
+    <p className="text-sm text-zinc-700 dark:text-zinc-300 mb-2">
+      Connect Google Calendar to push tasks automatically.
+    </p>
+
+    <button
+      onClick={() => window.open(`${BACKEND_URL}/calendar/auth`, '_blank')}
+      className="px-3 py-1.5 text-sm rounded bg-blue-600 text-white hover:bg-blue-700"
+    >
+      Connect Google Calendar
+    </button>
+  </div>
+)}
+
+{googleConnected && (
+  <div className="mb-2 text-xs text-green-600 dark:text-green-400">
+    ✅ Google Calendar connected
+  </div>
+)}
+
 
         {activeSection === 'active' && (
           <TodoList
             mode="active"
             tasks={tasks}
             onToggle={toggleTask}
+            googleConnected={googleConnected}
+
           />
         )}
 
@@ -1286,6 +1340,7 @@ const [summaries, setSummaries] = useState<any[]>([])
             mode="completed"
             tasks={tasks}
             onToggle={toggleTask}
+            googleConnected={googleConnected}
           />
         )}
       </main>

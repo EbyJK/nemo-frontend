@@ -151,12 +151,14 @@ type TodoListProps = {
   mode: 'active' | 'completed'
   tasks: Task[]
   onToggle: (id: number) => void
+  googleConnected: boolean
 }
 
 export function TodoList({
   mode,
   tasks,
-  onToggle
+  onToggle,
+  googleConnected
 }: TodoListProps) {
   const filteredTasks = tasks.filter(task =>
     mode === 'active' ? !task.completed : task.completed
@@ -227,9 +229,15 @@ export function TodoList({
     </span>
   )}
   {mode === 'active' && task.due_date && (
-  <button
+  <button  
+  disabled={!googleConnected}
+  className={`px-2 py-1 rounded text-xs
+    ${googleConnected
+      ? 'bg-blue-600 text-white hover:bg-blue-700'
+      : 'bg-zinc-400 text-zinc-200 cursor-not-allowed'}
+  `}
     onClick={() => pushToCalendar(task)}
-    className="self-start mt-1 text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
+    // className="self-start mt-1 text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
   >
     Push to Calendar
   </button>
@@ -254,6 +262,7 @@ async function pushToCalendar(task: Task) {
         due_date: task.due_date
       })
     })
+     alert('✔ Event successfully added to Google Calendar')
 
     const data = await res.json()
 
