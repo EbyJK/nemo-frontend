@@ -1037,6 +1037,11 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null)
   const [authChecked, setAuthChecked] = useState(false)
    const [googleConnected, setGoogleConnected] = useState(false)
+const [pushingTaskId, setPushingTaskId] = useState<number | null>(null)
+const [pushResult, setPushResult] = useState<{
+  taskId: number
+  calendarLink?: string
+} | null>(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -1128,6 +1133,51 @@ const [summaries, setSummaries] = useState<Summary[]>([])
       )
     )
   }
+  const pushToCalendar = async (task: Task) => {
+    let dueDateToSend = task.due_date
+// If backend gave only a date (YYYY-MM-DD), assume 9 AM IST
+if (dueDateToSend && !dueDateToSend.includes('T')) {
+  dueDateToSend = `${dueDateToSend}T09:00:00`
+}
+
+  try {
+    setPushingTaskId(task.id)
+    setPushResult(null)
+
+    const res = await fetch(`${BACKEND_URL}/calendar/push`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        title: task.title,
+        // due_date: task.due_date
+        due_date: dueDateToSend
+
+      })
+    })
+    //  console.log("Pushing due_date:", task.due_date)
+    console.log("Pushing due_date:", dueDateToSend)
+    const data = await res.json()
+
+    if (data.event_link) {
+      setPushResult({
+        taskId: task.id,
+        calendarLink: data.event_link
+      })
+
+      // optional: open automatically
+      // window.open(data.event_link, '_blank')
+    } else {
+      console.error('Calendar push failed', data)
+    }
+  } catch (err) {
+    console.error('Calendar error', err)
+  } finally {
+    setPushingTaskId(null)
+  }
+}
+
 
   /* ---------------- AUTH GUARDS ---------------- */
   if (!authChecked) {
@@ -1324,6 +1374,9 @@ const [summaries, setSummaries] = useState<Summary[]>([])
             tasks={tasks}
             onToggle={toggleTask}
             googleConnected={googleConnected}
+             onPush={pushToCalendar}
+            pushingTaskId={pushingTaskId}
+           pushResult={pushResult}
 
           />
         )}
@@ -1341,6 +1394,9 @@ const [summaries, setSummaries] = useState<Summary[]>([])
             tasks={tasks}
             onToggle={toggleTask}
             googleConnected={googleConnected}
+            onPush={pushToCalendar}
+            pushingTaskId={pushingTaskId}
+            pushResult={pushResult}
           />
         )}
       </main>

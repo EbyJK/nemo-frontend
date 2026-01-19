@@ -152,13 +152,23 @@ type TodoListProps = {
   tasks: Task[]
   onToggle: (id: number) => void
   googleConnected: boolean
+
+  onPush: (task: Task) => void
+  pushingTaskId: number | null
+  pushResult: {
+    taskId: number
+    calendarLink?: string
+  } | null
 }
 
 export function TodoList({
   mode,
   tasks,
   onToggle,
-  googleConnected
+  googleConnected,
+  onPush,
+  pushingTaskId,
+  pushResult
 }: TodoListProps) {
   const filteredTasks = tasks.filter(task =>
     mode === 'active' ? !task.completed : task.completed
@@ -230,19 +240,39 @@ export function TodoList({
   )}
   {mode === 'active' && task.due_date && (
   <button  
-  disabled={!googleConnected}
+  disabled={!googleConnected|| pushingTaskId===task.id}
   className={`px-2 py-1 rounded text-xs
     ${googleConnected
       ? 'bg-blue-600 text-white hover:bg-blue-700'
       : 'bg-zinc-400 text-zinc-200 cursor-not-allowed'}
   `}
-    onClick={() => pushToCalendar(task)}
+    // onClick={() => pushToCalendar(task)}
+    onClick={() => onPush(task)}
+
     // className="self-start mt-1 text-xs px-2 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
   >
-    Push to Calendar
+    {/* Push to Calendar */}
+    {pushingTaskId === task.id ? 'Adding…' : 'Push to Calendar'}
+
   </button>
+  
 )}
 
+{pushResult?.taskId === task.id && (
+  <div className="text-xs text-green-600 mt-1">
+    ✅ Added to calendar
+    {pushResult.calendarLink && (
+      <a
+        href={pushResult.calendarLink}
+        target="_blank"
+        rel="noreferrer"
+        className="ml-2 underline"
+      >
+        View
+      </a>
+    )}
+  </div>
+)}
 </li>
 
       ))}
@@ -250,28 +280,32 @@ export function TodoList({
   )
 }
 
-async function pushToCalendar(task: Task) {
-  try {
-    const res = await fetch(`${BACKEND_URL}/calendar/push`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        title: task.title,
-        due_date: task.due_date
-      })
-    })
-     alert('✔ Event successfully added to Google Calendar')
+// async function pushToCalendar(task: Task) {
+//   try {
+//     setPushingTaskId(task.id)
+//     setPushResult(null)
 
-    const data = await res.json()
 
-    if (data.event_link) {
-      window.open(data.event_link, '_blank')
-    } else {
-      console.error('Calendar push failed', data)
-    }
-  } catch (err) {
-    console.error('Calendar error', err)
-  }
-}
+//     const res = await fetch(`${BACKEND_URL}/calendar/push`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json'
+//       },
+//       body: JSON.stringify({
+//         title: task.title,
+//         due_date: task.due_date
+//       })
+//     })
+//      alert('✔ Event successfully added to Google Calendar')
+
+//     const data = await res.json()
+
+//     if (data.event_link) {
+//       window.open(data.event_link, '_blank')
+//     } else {
+//       console.error('Calendar push failed', data)
+//     }
+//   } catch (err) {
+//     console.error('Calendar error', err)
+//   }
+// }
