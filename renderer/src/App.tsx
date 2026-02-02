@@ -1011,7 +1011,7 @@ import { User } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 import { Auth } from './Auth'
 
-type Section = 'summaries' | 'active' | 'completed'
+type Section = 'emails'| 'summaries' | 'active' | 'completed'
 
 type Task = {
   id: number
@@ -1026,6 +1026,15 @@ type Summary = {
   
   summary: string
   confidence?: number
+}
+type ClassifiedEmail = {
+  id: string
+  subject: string
+  sender: string
+  body: string
+  category: 'corporate' | 'personal' | 'spam' | 'promotion'
+  detailed_category: string
+  confidence: number
 }
 
 // ✅ NEW: backend URL
@@ -1042,6 +1051,8 @@ const [pushResult, setPushResult] = useState<{
   taskId: number
   calendarLink?: string
 } | null>(null)
+const [emails, setEmails] = useState<ClassifiedEmail[]>([])
+
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -1084,11 +1095,13 @@ const [summaries, setSummaries] = useState<Summary[]>([])
 
     async function loadData() {
       try {
-        const [tasksRes, summariesRes] = await Promise.all([
+        const [tasksRes, summariesRes,emailsRes] = await Promise.all([
           fetch(`${BACKEND_URL}/tasks?completed=false`),
-          fetch(`${BACKEND_URL}/summaries`)
+          fetch(`${BACKEND_URL}/summaries`),
+          fetch(`${BACKEND_URL}/emails/classified`)
         ])
-
+         
+       
         const statusRes = await fetch(`${BACKEND_URL}/calendar/status`)
         const statusData = await statusRes.json()
         setGoogleConnected(statusData.connected)
@@ -1096,7 +1109,9 @@ const [summaries, setSummaries] = useState<Summary[]>([])
 
         const rawTasks = await tasksRes.json()
         const rawSummaries = await summariesRes.json()
-
+          const rawEmails = await emailsRes.json()
+          //emails from classifier
+          setEmails(rawEmails.emails)
         // Adapt backend → existing UI Task type
         const uiTasks: Task[] = rawTasks.map(
           (t: any, index: number) => ({
@@ -1311,6 +1326,53 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
       </header>
 
       <main className="p-4 space-y-3 overflow-y-auto">
+
+        {/*Emails */}
+        <SectionHeader
+      title="EMAILS"
+        open={activeSection === 'emails'}
+      onClick={() => setActiveSection('emails')}
+        />
+        {activeSection === 'emails' && (
+  <div className="space-y-3">
+    {emails.length === 0 && (
+      <p className="text-sm text-zinc-500">
+        No unread emails
+      </p>
+    )}
+
+    {emails.map(email => (
+      <div
+        key={email.id}
+        className="p-3 rounded-lg border dark:border-zinc-700"
+      >
+        <div className="flex justify-between items-start">
+          <div>
+            <p className="font-medium">{email.subject}</p>
+            <p className="text-xs text-zinc-500">
+              {email.sender}
+            </p>
+          </div>
+
+          <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200">
+            {email.detailed_category}
+          </span>
+        </div>
+
+        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300 line-clamp-3">
+          {email.body}
+        </p>
+
+        <p className="mt-1 text-xs text-zinc-400">
+          Category: {email.category} • Confidence: {(email.confidence * 100).toFixed(1)}%
+        </p>
+      </div>
+    ))}
+  </div>
+)}
+
+
+
         {/* SUMMARIES */}
         <SectionHeader
           title="SUMMARIES"
