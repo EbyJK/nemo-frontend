@@ -1098,7 +1098,7 @@ const [summaries, setSummaries] = useState<Summary[]>([])
         const [tasksRes, summariesRes,emailsRes] = await Promise.all([
           fetch(`${BACKEND_URL}/tasks?completed=false`),
           fetch(`${BACKEND_URL}/summaries`),
-          fetch(`${BACKEND_URL}/emails/classified`)
+          fetch(`${BACKEND_URL}/emails/classified`)                 ///gmail/list   for all emails  fetching 
         ])
          
        
