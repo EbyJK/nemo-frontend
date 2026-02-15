@@ -1325,7 +1325,27 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
         </div>
       </header>
 
-      <main className="p-4 space-y-3 overflow-y-auto">
+      <main className="p-4 space-y-3 overflow-y-auto min-h-screen  bg-white dark:bg-zinc-900">
+        {!googleConnected && (
+  <div className="mb-3 p-3 rounded-lg bg-blue-50 dark:bg-zinc-800 border border-blue-200 dark:border-zinc-700">
+    <p className="text-sm text-zinc-700 dark:text-zinc-300 mb-2">
+      Connect Google account for calendar and inbox access.
+    </p>
+
+    <button
+      onClick={() => window.open(`${BACKEND_URL}/calendar/auth`, '_blank')}
+      className="px-3 py-1.5 text-sm rounded bg-blue-600 text-white hover:bg-blue-700"
+    >
+      Connect Google Account
+    </button>
+  </div>
+)}
+
+{googleConnected && (
+  <div className="mb-2 text-xs text-green-600 dark:text-green-400">
+    ✅ Google account connected
+  </div>
+)}
 
         {/*Emails */}
         <SectionHeader
@@ -1334,7 +1354,7 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
       onClick={() => setActiveSection('emails')}
         />
         {activeSection === 'emails' && (
-  <div className="space-y-3">
+  <div className="space-y-3 min-h-screen  bg-white dark:bg-zinc-900">
     {emails.length === 0 && (
       <p className="text-sm text-zinc-500">
         No unread emails
@@ -1363,7 +1383,7 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
           {email.body}
         </p>
 
-        <p className="mt-1 text-xs text-zinc-400">
+        <p className="mt-1 text-xs font-medium text-orange-600 dark:text-orange-400">
           Category: {email.category} • Confidence: {(email.confidence * 100).toFixed(1)}%
         </p>
       </div>
@@ -1408,7 +1428,7 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
           open={activeSection === 'active'}
           onClick={() => setActiveSection('active')}
         />
-        {!googleConnected && (
+        {/* {!googleConnected && (
   <div className="mb-3 p-3 rounded-lg bg-blue-50 dark:bg-zinc-800 border border-blue-200 dark:border-zinc-700">
     <p className="text-sm text-zinc-700 dark:text-zinc-300 mb-2">
       Connect Google Calendar to push tasks automatically.
@@ -1427,7 +1447,7 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
   <div className="mb-2 text-xs text-green-600 dark:text-green-400">
     ✅ Google Calendar connected
   </div>
-)}
+)} */}
 
 
         {activeSection === 'active' && (

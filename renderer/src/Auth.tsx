@@ -28,7 +28,17 @@ export function Auth() {
   }
 
   return (
+           
+   
+
+
+
     <div className="h-screen flex flex-col justify-center p-6 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">
+       <div className="flex gap-2">
+    <button onClick={() => window.electronAPI?.minimize()}>_</button>
+    <button onClick={() => window.electronAPI?.toggleAlwaysOnTop()}>📌</button>
+    <button onClick={() => window.electronAPI?.close()}>X</button>
+  </div>
       <h2 className="text-lg font-semibold mb-4">
         Sign in to NEMO 
       </h2>
