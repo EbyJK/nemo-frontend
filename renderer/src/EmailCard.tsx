@@ -46,7 +46,7 @@ export function EmailCard({ summary,confidence,subject,sender,has_attachment }: 
     
 
       {confidence !== undefined && (
-  <div className="text-xs font-medium text-orange-600 dark:text-orange-400 mt-1">
+  <div className="mt-2 inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
     Confidence: {Math.round(confidence * 100)}%
   </div>
 
