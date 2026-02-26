@@ -44,7 +44,7 @@ type ClassifiedEmail = {
   }[]
 }
 
-// ✅ NEW: backend URL
+//  NEW: backend URL
 const BACKEND_URL = 'http://127.0.0.1:8000'
 
 export default function App() {
@@ -60,7 +60,7 @@ const [pushResult, setPushResult] = useState<{
 } | null>(null)
 const [emails, setEmails] = useState<ClassifiedEmail[]>([])
 const [emailsLoading, setEmailsLoading] = useState(true)
-
+const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -96,6 +96,17 @@ const [summaries, setSummaries] = useState<Summary[]>([])
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode)
   }, [darkMode])
+
+   useEffect(() => {
+  const handleClick = () => setMenuOpen(false)
+  if (menuOpen) {
+    window.addEventListener('click', handleClick)
+  }
+  return () => window.removeEventListener('click', handleClick)
+}, [menuOpen])
+
+
+
 
   /* ---------------- ✅ FETCH FROM BACKEND ---------------- */
   useEffect(() => {
@@ -444,19 +455,84 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
   </div>
 )}
 
-{googleConnected && (
-  // <div className="mb-2 text-xs text-green-600 dark:text-green-400">
-  //   ✅ Google account connected
-  // </div>
+{/* {googleConnected && (
+  
   <div className="mb-2 inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-green-500 to-emerald-600 px-3 py-1 text-xs font-semibold text-white shadow-md">
     <span className="h-2 w-2 rounded-full bg-white animate-ping"></span>
     Connected to Google
   </div>
-  
 
 
+)} */}
 
+{googleConnected && (
+  <div className="mb-2 flex items-center justify-between">
+    
+    {/* Left side - Connected badge */}
+    <div className="inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-green-500 to-emerald-600 px-3 py-1 text-xs font-semibold text-white shadow-md">
+      <span className="h-2 w-2 rounded-full bg-white animate-ping"></span>
+      Connected to Google
+    </div>
+
+    {/* Right side - Hamburger Dropdown */}
+    <div
+      className="relative"
+      style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+    >
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          setMenuOpen(!menuOpen)}}
+        className="p-2 rounded hover:bg-zinc-200 dark:hover:bg-zinc-800"
+      >
+        {/* 3-line SVG icon */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5 text-zinc-700 dark:text-zinc-300"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      {menuOpen && (
+        <div className="absolute right-0 mt-2 w-44 rounded-lg shadow-lg bg-white dark:bg-zinc-800 border dark:border-zinc-700 z-50">
+          
+          {[
+            { label: 'Emails', value: 'emails' },
+            { label: 'Summaries', value: 'summaries' },
+            { label: 'Active Tasks', value: 'active' },
+            { label: 'Completed Tasks', value: 'completed' }
+          ].map(item => (
+            <button
+              key={item.value}
+              onClick={(e) => {
+                e.stopPropagation()
+                setActiveSection(item.value as Section)
+                setMenuOpen(false)
+              }}
+              className="block w-full text-left px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-700"
+            >
+              {item.label}
+            </button>
+          ))}
+
+        </div>
+      )}
+    </div>
+
+  </div>
 )}
+
+
+
+
+
+
+
 
         {/*Emails */}
         <SectionHeader
@@ -592,26 +668,7 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
           open={activeSection === 'active'}
           onClick={() => setActiveSection('active')}
         />
-        {/* {!googleConnected && (
-  <div className="mb-3 p-3 rounded-lg bg-blue-50 dark:bg-zinc-800 border border-blue-200 dark:border-zinc-700">
-    <p className="text-sm text-zinc-700 dark:text-zinc-300 mb-2">
-      Connect Google Calendar to push tasks automatically.
-    </p>
-
-    <button
-      onClick={() => window.open(`${BACKEND_URL}/calendar/auth`, '_blank')}
-      className="px-3 py-1.5 text-sm rounded bg-blue-600 text-white hover:bg-blue-700"
-    >
-      Connect Google Calendar
-    </button>
-  </div>
-)}
-
-{googleConnected && (
-  <div className="mb-2 text-xs text-green-600 dark:text-green-400">
-    ✅ Google Calendar connected
-  </div>
-)} */}
+        
 
 
         {activeSection === 'active' && (

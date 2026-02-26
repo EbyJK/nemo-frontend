@@ -258,64 +258,11 @@ export function TodoList({
   
 )}
 
-{/* {pushResult?.taskId === task.id && (
-  <div className="text-xs text-green-600 mt-1">
-    ✅ Added to calendar
-    {pushResult.calendarLink && (
-      <a
-        href={pushResult.calendarLink}
-        target="_blank"
-        rel="noreferrer"
-        className="ml-2 underline"
-      >
-        View
-      </a>
-    )}
-  </div>
-)} */}
 
 
 
-{/* {pushResult?.taskId === task.id && (
-  <div className="mt-2 flex items-center justify-between rounded-md bg-green-50 border border-green-200 px-3 py-2 text-sm text-green-700">
-    <span className="font-medium">
-       Successfully added.
-    </span>
-
-    {pushResult.calendarLink && (
-      <a
-        href={pushResult.calendarLink}
-        target="_blank"
-        rel="noreferrer"
-        className="ml-4 inline-flex items-center rounded-md bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700 transition-colors duration-200"
-      >
-        View 
-      </a>
-    )}
-  </div>
-)} */}
 
 
-{/* {pushResult?.taskId === task.id && (
-  <div className="mt-2 border-l-4 border-green-600 bg-green-50 px-4 py-2 text-sm text-green-800">
-    <div className="flex items-center justify-between">
-      <span className="font-medium">
-        The event has been added to your calendar.
-      </span>
-
-      {pushResult.calendarLink && (
-        <a
-          href={pushResult.calendarLink}
-          target="_blank"
-          rel="noreferrer"
-          className="ml-4 font-medium text-green-700 hover:underline"
-        >
-          Open
-        </a>
-      )}
-    </div>
-  </div>
-)} */}
 
 
 {pushResult?.taskId === task.id && (
