@@ -11,7 +11,7 @@ import { Auth } from './Auth'
 type Section = 'emails'| 'summaries' | 'active' | 'completed'
 
 type Task = {
-  id: number
+  id: string
   title: string
   completed: boolean
   due_date?: string
@@ -53,14 +53,25 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null)
   const [authChecked, setAuthChecked] = useState(false)
    const [googleConnected, setGoogleConnected] = useState(false)
-const [pushingTaskId, setPushingTaskId] = useState<number | null>(null)
+const [pushingTaskId, setPushingTaskId] = useState<string | null>(null)
 const [pushResult, setPushResult] = useState<{
-  taskId: number
+  taskId: string
   calendarLink?: string
 } | null>(null)
 const [emails, setEmails] = useState<ClassifiedEmail[]>([])
 const [emailsLoading, setEmailsLoading] = useState(true)
 const [menuOpen, setMenuOpen] = useState(false)
+const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+const [detailsOpen, setDetailsOpen] = useState(false)
+
+const openDetails = (task: Task) => {
+  setSelectedTask(task)
+  setDetailsOpen(true)
+}
+
+const closeDetails = () => {
+  setDetailsOpen(false)
+}
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -124,7 +135,7 @@ const [summaries, setSummaries] = useState<Summary[]>([])
         //   fetch(`${BACKEND_URL}/summaries`),
         //   fetch(`${BACKEND_URL}/emails/classified`)                 ///gmail/list   for all emails  fetching 
         // ])
-         const tasksPromise = fetch(`${BACKEND_URL}/tasks?completed=false`)
+         const tasksPromise = fetch(`${BACKEND_URL}/tasks`)
         const summariesPromise = fetch(`${BACKEND_URL}/summaries`)
         const emailsPromise = fetch(`${BACKEND_URL}/emails/classified`)
 
@@ -159,14 +170,30 @@ const [summaries, setSummaries] = useState<Summary[]>([])
 
 
         // Adapt backend → existing UI Task type
+
+
+        // const uiTasks: Task[] = rawTasks.map(
+        //   (t: any, index: number) => ({
+        //     id: index + 1,
+        //     title: t.title,
+        //     completed: t.completed,
+        //     due_date:t.due_date,
+        //     priority:t.priority,
+        //     context:t.context
+        //   })
+        // )
+        
+        console.log("RAW SUPABASE TASKS:", rawTasks)
+
         const uiTasks: Task[] = rawTasks.map(
-          (t: any, index: number) => ({
-            id: index + 1,
+          (t: any) => ({
+            id: t.id,
             title: t.title,
-            completed: t.completed,
-            due_date:t.due_date,
-            priority:t.priority,
-            context:t.context
+            // completed: t.completed===true || t.completed === "true" ? true:false,
+            completed: Boolean(t.completed),
+            due_date:t.due_date || undefined,
+            priority:t.priority || "medium",
+            context:t.context || ""
           })
         )
 
@@ -196,15 +223,50 @@ const [summaries, setSummaries] = useState<Summary[]>([])
   }, [user])
 
   /* ---------------- TASK TOGGLE (UNCHANGED) ---------------- */
-  const toggleTask = (id: number) => {
-    setTasks(tasks =>
-      tasks.map(task =>
-        task.id === id
-          ? { ...task, completed: !task.completed }
-          : task
-      )
+  // const toggleTask = (id: number) => {
+  //   setTasks(tasks =>
+  //     tasks.map(task =>
+  //       task.id === id
+  //         ? { ...task, completed: !task.completed }
+  //         : task
+  //     )
+  //   )
+  // }
+
+
+
+  const toggleTask = async (id: string) => {
+  // 1) Find task in local state
+  const task = tasks.find(t => t.id === id)
+  if (!task) return
+
+  const newCompleted = !task.completed
+
+  // 2) Optimistic UI update
+  setTasks(prev =>
+    prev.map(t =>
+      t.id === id ? { ...t, completed: newCompleted } : t
     )
+  )
+
+   // 3) Reset push result (avoid calendar success badge on moved tasks)
+  if (pushResult?.taskId === id) {
+    setPushResult(null)
   }
+
+  try {
+    // 3) Send update to backend
+    // NOTE: You must store actual Supabase task.id (UUID),
+    // not the index number. (Explained below.)
+    await fetch(`${BACKEND_URL}/tasks/${task.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ completed: newCompleted })
+    })
+  } catch (err) {
+    console.error("Failed to update task", err)
+  }
+}
   const pushToCalendar = async (task: Task) => {
     let dueDateToSend = task.due_date
 // If backend gave only a date (YYYY-MM-DD), assume 9 AM IST
@@ -680,7 +742,8 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
              onPush={pushToCalendar}
             pushingTaskId={pushingTaskId}
            pushResult={pushResult}
-
+           onOpenDetails={(task) => setSelectedTask(task)}
+            // onOpenDetails={openDetails}
           />
         )}
 
@@ -700,8 +763,47 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
             onPush={pushToCalendar}
             pushingTaskId={pushingTaskId}
             pushResult={pushResult}
+            onOpenDetails={openDetails}
           />
         )}
+
+        {detailsOpen && selectedTask && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white dark:bg-zinc-900 p-5 rounded-xl shadow-lg w-96">
+      
+      <h2 className="text-lg font-semibold">
+        {selectedTask.title}
+      </h2>
+
+      {selectedTask.due_date && (
+        <p className="text-sm mt-2 text-zinc-600 dark:text-zinc-300">
+          <strong>Due:</strong> {new Date(selectedTask.due_date).toLocaleString()}
+        </p>
+      )}
+
+      {selectedTask.priority && (
+        <p className="text-sm mt-1">
+          <strong>Priority:</strong> {selectedTask.priority}
+        </p>
+      )}
+
+      {selectedTask.context && (
+        <p className="text-xs mt-2 italic text-zinc-400">{selectedTask.context}</p>
+      )}
+
+      <button
+        onClick={closeDetails}
+        className="mt-4 w-full px-3 py-2 rounded bg-blue-600 text-white"
+      >
+        Close
+      </button>
+
+    </div>
+  </div>
+)}
+
+
+
       </main>
     </div>
   )
