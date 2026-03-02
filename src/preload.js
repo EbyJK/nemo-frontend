@@ -7,7 +7,8 @@ const { contextBridge, ipcRenderer } = require('electron')
 contextBridge.exposeInMainWorld('electronAPI', {
   minimize: () => ipcRenderer.send('window:minimize'),
   close: () => ipcRenderer.send('window:close'),
-    toggleAlwaysOnTop: () => ipcRenderer.send('window:toggle-always-on-top')
+    toggleAlwaysOnTop: () => ipcRenderer.send('window:toggle-always-on-top'),
+     resetToRightmost: () => ipcRenderer.send('window:reset-rightmost'),  
 })
 
 

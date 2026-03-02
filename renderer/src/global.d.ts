@@ -5,6 +5,7 @@ declare global {
     electronAPI?: {
       minimize: () => void
       close: () => void
+      resetToRightmost: () => void 
     }
   }
 }

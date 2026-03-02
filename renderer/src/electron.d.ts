@@ -6,6 +6,7 @@ declare global {
       minimize: () => void
       close: () => void
       toggleAlwaysOnTop: () => void
+      resetToRightmost: () => void 
     }
   }
 }

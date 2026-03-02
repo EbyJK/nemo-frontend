@@ -63,8 +63,8 @@ tray.on('click', () => {
   win.focus()
 })
 
-// GLOBAL SHORTCUT: Ctrl + Shift + N
-const registered = globalShortcut.register('Control+Shift+N', () => {
+// GLOBAL SHORTCUT: Ctrl + q
+const registered = globalShortcut.register('Control+q', () => {
   toggleWindow()
 })
 
@@ -100,3 +100,17 @@ ipcMain.on('window:toggle-always-on-top', () => {
 app.on('will-quit', () => {
   globalShortcut.unregisterAll()
 })
+
+
+ipcMain.on('window:reset-rightmost', () => {
+  if (!win) return;
+
+  const { width } = screen.getPrimaryDisplay().workAreaSize; // Get screen width
+  const sidebarWidth = 400; // Sidebar width as defined in the BrowserWindow setup
+  win.setBounds({
+    x: width - sidebarWidth,  // Move window to the rightmost position
+    y: 0,                     // Keep it at the top (y = 0)
+    width: sidebarWidth,      // Sidebar width
+    height: win.getBounds().height, // Retain current height
+  });
+});
