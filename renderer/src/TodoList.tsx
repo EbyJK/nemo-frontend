@@ -9,6 +9,7 @@ type Task = {
   due_date?: string
   priority?: string
   context?: string
+  email_id?: string
 }
 
 type TodoListProps = {
@@ -41,7 +42,8 @@ export function TodoList({
   onDelete
 }: TodoListProps) {
 
-  const filteredTasks = tasks.filter(t =>
+    const safeTasks = tasks.filter(Boolean)
+  const filteredTasks = safeTasks.filter(t =>
     mode === "active" ? !t.completed : t.completed
   )
   
