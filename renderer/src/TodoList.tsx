@@ -24,7 +24,8 @@ type TodoListProps = {
     calendarLink?: string
   } | null
   
-
+   sortType: "default" | "due_desc" | "due_asc" | "priority_desc" | "priority_asc"
+   onDelete: (id: string) => void
 }
 
 export function TodoList({
@@ -35,12 +36,48 @@ export function TodoList({
   onPush,
   pushingTaskId,
   pushResult,
-  onOpenDetails
+  onOpenDetails,
+  sortType,
+  onDelete
 }: TodoListProps) {
 
   const filteredTasks = tasks.filter(t =>
     mode === "active" ? !t.completed : t.completed
   )
+  
+  const priorityOrder: Record<string, number> = {
+  high: 3,
+  medium: 2,
+  low: 1
+}
+
+const sortedTasks = [...filteredTasks].sort((a, b) => {
+  if (sortType === "due_desc") {
+    if (!a.due_date) return 1
+    if (!b.due_date) return -1
+    return new Date(b.due_date).getTime() - new Date(a.due_date).getTime()
+  }
+
+  if (sortType === "due_asc") {
+    if (!a.due_date) return 1
+    if (!b.due_date) return -1
+    return new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+  }
+
+  if (sortType === "priority_desc") {
+    return (priorityOrder[b.priority || "medium"] || 0) -
+           (priorityOrder[a.priority || "medium"] || 0)
+  }
+
+  if (sortType === "priority_asc") {
+    return (priorityOrder[a.priority || "medium"] || 0) -
+           (priorityOrder[b.priority || "medium"] || 0)
+  }
+
+  return 0
+})
+  
+
 
   if (filteredTasks.length === 0) {
     return <p className="text-sm text-zinc-500 px-2">No tasks here</p>
@@ -49,7 +86,8 @@ export function TodoList({
   return (
     <div className="space-y-2">
       <AnimatePresence>
-        {filteredTasks.map(task => {
+        {/* {filteredTasks.map(task => { */}
+         {sortedTasks.map(task => {
           const isOverdue =
             task.due_date && !task.completed &&
             new Date(task.due_date) < new Date()
@@ -145,7 +183,7 @@ export function TodoList({
               )}
 
               {/* Push Success Badge */}
-              {pushResult?.taskId === task.id && (
+              {  pushResult?.taskId === task.id && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -166,6 +204,18 @@ export function TodoList({
                   )}
                 </motion.div>
               )}
+              {mode === "completed" && (
+  <div className="mt-2 flex justify-end">
+    <button
+      onClick={() => onDelete(task.id)}
+      className="text-xs px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 transition"
+    >
+      Delete
+    </button>
+  </div>
+)}
+
+
             </motion.li>
           )
         })}

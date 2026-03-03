@@ -97,6 +97,10 @@ const closeDetails = () => {
 
   /* ---------------- DATA STATE ---------------- */
   const [tasks, setTasks] = useState<Task[]>([])
+   const [taskSort, setTaskSort] = useState<
+  "default" | "due_desc" | "due_asc" | "priority_desc" | "priority_asc" 
+>("default")
+
   const [summaryCount, setSummaryCount] = useState(0)
   const [loading, setLoading] = useState(true)
 // const [summaries, setSummaries] = useState<any[]>([])
@@ -267,6 +271,23 @@ const [summaries, setSummaries] = useState<Summary[]>([])
     console.error("Failed to update task", err)
   }
 }
+ const deleteTask = async (id: string) => {
+  try {
+    await fetch(`${BACKEND_URL}/tasks/${id}`, {
+      method: "DELETE"
+    })
+
+    // Remove from UI immediately
+    setTasks(prev => prev.filter(t => t.id !== id))
+
+  } catch (err) {
+    console.error("Failed to delete task", err)
+  }
+}
+
+
+
+
   const pushToCalendar = async (task: Task) => {
     let dueDateToSend = task.due_date
 // If backend gave only a date (YYYY-MM-DD), assume 9 AM IST
@@ -755,6 +776,56 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
 
 
         {activeSection === 'active' && (
+  
+           <>
+  <div className="flex justify-end mb-4">
+    <div className="relative inline-block w-52">
+      <select
+        value={taskSort}
+        onChange={(e) => setTaskSort(e.target.value as any)}
+        className="
+          w-full
+          appearance-none
+          bg-white dark:bg-zinc-900
+          border border-zinc-300 dark:border-zinc-700
+          text-sm text-zinc-700 dark:text-zinc-200
+          px-4 py-2 pr-10
+          rounded-lg
+          shadow-sm
+          hover:border-zinc-400 dark:hover:border-zinc-500
+          focus:outline-none
+          focus:ring-2 focus:ring-indigo-500/40
+          focus:border-indigo-500
+          transition-all duration-200
+          cursor-pointer
+        "
+      >
+        <option value="default">Default</option>
+        <option value="due_desc">Due Date (new)</option>
+        <option value="due_asc">Due Date (old)</option>
+        <option value="priority_desc">Priority High → Low</option>
+        <option value="priority_asc">Priority Low → High</option>
+      </select>
+
+      {/* Custom Dropdown Icon */}
+      <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-zinc-400 dark:text-zinc-500">
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+    </div>
+  </div>
+        
+
+
+
+
           <TodoList
             mode="active"
             tasks={tasks}
@@ -764,9 +835,12 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
             pushingTaskId={pushingTaskId}
            pushResult={pushResult}
            onOpenDetails={(task) => setSelectedTask(task)}
+           sortType={taskSort}
+           onDelete={deleteTask}
             // onOpenDetails={openDetails}
           />
-        )}
+          </>
+       )} 
 
         {/* COMPLETED TASKS */}
         <SectionHeader
@@ -785,6 +859,8 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
             pushingTaskId={pushingTaskId}
             pushResult={pushResult}
             onOpenDetails={openDetails}
+            sortType={taskSort}
+            onDelete={deleteTask}
           />
         )}
 
