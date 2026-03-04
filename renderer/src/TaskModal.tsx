@@ -12,14 +12,7 @@ type TaskModalProps = {
 }
 
 export function TaskModal({ task, email, onClose,onUpdate }: TaskModalProps) {
-  // if (!task) return null
-
-// const [isEditing, setIsEditing] = React.useState(false)
-// const [title, setTitle] = React.useState(task.title)
-// const [dueDate, setDueDate] = React.useState(
-//   task.due_date ? task.due_date.split("T")[0] : ""
-// )
-// const [priority, setPriority] = React.useState(task.priority || "Medium")
+  
 
 
 const [isEditing, setIsEditing] = React.useState(false)
@@ -53,7 +46,7 @@ const [isEditing, setIsEditing] = React.useState(false)
 
         {/* Task Info */}
         <div className="space-y-2 text-sm">
-          {/* <p><strong>Title:</strong> {task.title}</p> */}
+          
           <p>
   <strong>Title:</strong>{" "}
   {isEditing ? (
@@ -76,9 +69,7 @@ const [isEditing, setIsEditing] = React.useState(false)
     task.title
   )}
 </p>
-          {/* {task.due_date && (
-            <p><strong>Due Date:</strong> {new Date(task.due_date).toLocaleString()}</p>
-          )} */}
+          
           <p>
   <strong>Due Date:</strong>{" "}
   {isEditing ? (
@@ -102,9 +93,7 @@ const [isEditing, setIsEditing] = React.useState(false)
     task.due_date && new Date(task.due_date).toLocaleString()
   )}
 </p>
-          {/* {task.priority && (
-            <p><strong>Priority:</strong> {task.priority}</p>
-          )} */}
+          
             <p>
   <strong>Priority:</strong>{" "}
   {isEditing ? (
