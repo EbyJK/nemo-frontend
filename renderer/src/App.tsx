@@ -281,12 +281,21 @@ const updateTask = async (id: string, updates: {
       body: JSON.stringify(updates)
     })
 
+    if (!res.ok) {
+  throw new Error("Failed to update task")
+}
     const updatedTask = await res.json()
 
 
     setTasks(prev =>
       prev.map(t => (t.id === id ? updatedTask : t))
     )
+
+//     setTasks(prev =>
+//   prev.map(t =>
+//     t.id === id ? { ...t, ...updatedTask } : t
+//   )
+// )
 
   } catch (err) {
     console.error("Failed to update task", err)

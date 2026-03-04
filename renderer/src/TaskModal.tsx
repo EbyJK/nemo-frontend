@@ -112,9 +112,9 @@ const [isEditing, setIsEditing] = React.useState(false)
     dark:text-zinc-100
     dark:border-zinc-600"
     >
-      <option value="High">High</option>
-      <option value="Medium">Medium</option>
-      <option value="Low">Low</option>
+      <option value="high">High</option>
+      <option value="medium">Medium</option>
+      <option value="low">Low</option>
     </select>
   ) : (
     task.priority
