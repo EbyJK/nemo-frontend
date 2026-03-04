@@ -99,9 +99,7 @@ const closeDetails = () => {
 
   /* ---------------- DATA STATE ---------------- */
   const [tasks, setTasks] = useState<Task[]>([])
-//    const [taskSort, setTaskSort] = useState<
-//   "default" | "due_desc" | "due_asc" | "priority_desc" | "priority_asc" 
-// >("default")
+
 
 const [activeTaskSort, setActiveTaskSort] = useState<
   "default" | "due_desc" | "due_asc" | "priority_desc" | "priority_asc"
@@ -113,7 +111,7 @@ const [completedTaskSort, setCompletedTaskSort] = useState<
 
   const [summaryCount, setSummaryCount] = useState(0)
   const [loading, setLoading] = useState(true)
-// const [summaries, setSummaries] = useState<any[]>([])
+
 
 const [summaries, setSummaries] = useState<Summary[]>([])
 
@@ -144,11 +142,8 @@ const [summaries, setSummaries] = useState<Summary[]>([])
         }
       try {
         
-        // const [tasksRes, summariesRes,emailsRes] = await Promise.all([
-        //   fetch(`${BACKEND_URL}/tasks?completed=false`),
-        //   fetch(`${BACKEND_URL}/summaries`),
-        //   fetch(`${BACKEND_URL}/emails/classified`)                 ///gmail/list   for all emails  fetching 
-        // ])
+                         ///gmail/list   for all emails  fetching 
+      
          const tasksPromise = fetch(`${BACKEND_URL}/tasks`)
         const summariesPromise = fetch(`${BACKEND_URL}/summaries`)
         const emailsPromise = fetch(`${BACKEND_URL}/emails/classified`)
@@ -168,10 +163,7 @@ const [summaries, setSummaries] = useState<Summary[]>([])
         const rawSummaries = await summariesRes.json()
           const rawEmails = await emailsRes.json()
 
-          // setEmails(Array.isArray(rawEmails.emails) ? rawEmails.emails : [])   //safe guard
-
-          //emails from classifier
-          // setEmails(rawEmails.emails)
+          
 
 
           if (rawEmails && Array.isArray(rawEmails.emails)) {
@@ -179,23 +171,10 @@ const [summaries, setSummaries] = useState<Summary[]>([])
           } else {
           setEmails([])   // fallback safe
           }
-          // setEmailsLoading(false)
+          
 
 
 
-        // Adapt backend → existing UI Task type
-
-
-        // const uiTasks: Task[] = rawTasks.map(
-        //   (t: any, index: number) => ({
-        //     id: index + 1,
-        //     title: t.title,
-        //     completed: t.completed,
-        //     due_date:t.due_date,
-        //     priority:t.priority,
-        //     context:t.context
-        //   })
-        // )
         
         console.log("RAW SUPABASE TASKS:", rawTasks)
 
@@ -203,7 +182,6 @@ const [summaries, setSummaries] = useState<Summary[]>([])
           (t: any) => ({
             id: t.id,
             title: t.title,
-            // completed: t.completed===true || t.completed === "true" ? true:false,
             completed: Boolean(t.completed),
             due_date:t.due_date || undefined,
             priority:t.priority || "medium",
@@ -228,7 +206,7 @@ const [summaries, setSummaries] = useState<Summary[]>([])
 
     loadData(true)
 
-    //🔥 ADD THIS POLLING
+    // ADD THIS POLLING
    const interval = setInterval(()=>loadData(false), 10000)
 
     return () => clearInterval(interval)
@@ -237,16 +215,7 @@ const [summaries, setSummaries] = useState<Summary[]>([])
 
   }, [user])
 
-  /* ---------------- TASK TOGGLE (UNCHANGED) ---------------- */
-  // const toggleTask = (id: number) => {
-  //   setTasks(tasks =>
-  //     tasks.map(task =>
-  //       task.id === id
-  //         ? { ...task, completed: !task.completed }
-  //         : task
-  //     )
-  //   )
-  // }
+
 
 
 
@@ -298,30 +267,6 @@ const [summaries, setSummaries] = useState<Summary[]>([])
 
 
 
-
-// const updateTask = async (id: string, updates: {
-//   title: string
-//   due_date?: string
-//   priority?: string
-// }) => {
-//   try {
-//     // Optimistic update
-//     setTasks(prev =>
-//       prev.map(t =>
-//         t.id === id ? { ...t, ...updates } : t
-//       )
-//     )
-
-//     await fetch(`${BACKEND_URL}/tasks/${id}`, {
-//       method: "PATCH",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify(updates)
-//     })
-
-//   } catch (err) {
-//     console.error("Failed to update task", err)
-//   }
-// }
 
 
 const updateTask = async (id: string, updates: {
@@ -426,9 +371,7 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
             alt="Mail Assistant"
             className="h-9 w-9 object-contain"
           />
-          {/* <span className="text-lg font-semibold">
-            NEMO
-          </span> */}
+         
           <div className="flex flex-col items-start mr-1">
           <span className="text-l font-semibold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600 font-playfair">
            NEMO
@@ -451,7 +394,7 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
     <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="2" className="text-pink-500" />
   </svg>
  
-  {/* 📌 */}
+ 
 </button>
 
   {/* Minimize */}
@@ -622,15 +565,7 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
   </div>
 )}
 
-{/* {googleConnected && (
-  
-  <div className="mb-2 inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-green-500 to-emerald-600 px-3 py-1 text-xs font-semibold text-white shadow-md">
-    <span className="h-2 w-2 rounded-full bg-white animate-ping"></span>
-    Connected to Google
-  </div>
 
-
-)} */}
 
 {googleConnected && (
   <div className="mb-2 flex items-center justify-between">
@@ -716,12 +651,7 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
       </div>
     )}
 
-    {/* {!emailsLoading && emails.length === 0 && (
-      <p className="text-sm text-zinc-500">
-        No unread emails
-      </p>
-      
-    )} */}
+    
     {emails.length === 0 && (
   <div className="flex items-center gap-2 text-sm text-zinc-500">
     {emailsLoading && (
@@ -807,13 +737,7 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
         {activeSection === 'summaries' && (
           <div className="space-y-3">
             {loading && <p className="text-sm">Loading summaries…</p>}
-            {/* {Array.from({ length: summaryCount }).map((_, i) => (
-              <EmailCard key={i} />
-            ))} */}
-
-            {/* {summaries.map((s) => (
-  <EmailCard key={s.id} summary={s.summary} />
-))} */}   
+              
 {summaries.map((s, i) => (
   <EmailCard
     key={i}
@@ -976,63 +900,12 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
           />
           </>
         )}
-
-        {/* { detailsOpen && selectedTask && (
-          <>
-    <div style={{ color: "red", fontSize: "12px" }}>
-      SelectedTask email_id: {selectedTask.email_id}
-      <br />
-      Emails count: {emails.length}
-    </div>
-
-  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-    <div className="bg-white dark:bg-zinc-900 p-5 rounded-xl shadow-lg w-96">
-      
-      <h2 className="text-lg font-semibold">
-        {selectedTask.title}
-      </h2>
-
-      {selectedTask.due_date && (
-        <p className="text-sm mt-2 text-zinc-600 dark:text-zinc-300">
-          <strong>Due:</strong> {new Date(selectedTask.due_date).toLocaleString()}
-        </p>
-      )}
-
-      {selectedTask.priority && (
-        <p className="text-sm mt-1">
-          <strong>Priority:</strong> {selectedTask.priority}
-        </p>
-      )}
-
-      {selectedTask.context && (
-        <p className="text-xs mt-2 italic text-zinc-400">{selectedTask.context}</p>
-      )}
-
-      <button
-        onClick={closeDetails}
-        className="mt-4 w-full px-3 py-2 rounded bg-blue-600 text-white"
-      >
-        Close
-      </button>
-
-    </div>
-  </div>
-  </>
-)} */}
-
-
-
       </main>
 
       {selectedTask && (
-
      <>
-   
-
   <TaskModal
     task={selectedTask}
-    // email={null}
-    // email={emails.find(e => e.id === selectedTask.email_id)}
     email={
   selectedTask.email_id
     ? emails.find(e => String(e.id) === String(selectedTask.email_id))
@@ -1042,20 +915,7 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
     onUpdate={updateTask}
   />
   </>
-
-
-
-
-
-
 )}
-
-
-
-
-
-
-
     </div>
   )
 }
