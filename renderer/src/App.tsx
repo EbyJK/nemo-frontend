@@ -7,7 +7,7 @@ import logo from './assets/logo.png'
 import { User } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 import { Auth } from './Auth'
-
+import {TaskModal} from './TaskModal'
 type Section = 'emails'| 'summaries' | 'active' | 'completed'
 
 type Task = {
@@ -17,6 +17,8 @@ type Task = {
   due_date?: string
   priority?: string
   context?: string
+  email_id?: string
+
 }
 
 type Summary = {
@@ -97,8 +99,16 @@ const closeDetails = () => {
 
   /* ---------------- DATA STATE ---------------- */
   const [tasks, setTasks] = useState<Task[]>([])
-   const [taskSort, setTaskSort] = useState<
-  "default" | "due_desc" | "due_asc" | "priority_desc" | "priority_asc" 
+//    const [taskSort, setTaskSort] = useState<
+//   "default" | "due_desc" | "due_asc" | "priority_desc" | "priority_asc" 
+// >("default")
+
+const [activeTaskSort, setActiveTaskSort] = useState<
+  "default" | "due_desc" | "due_asc" | "priority_desc" | "priority_asc"
+>("default")
+
+const [completedTaskSort, setCompletedTaskSort] = useState<
+  "default" | "due_desc" | "due_asc" | "priority_desc" | "priority_asc"
 >("default")
 
   const [summaryCount, setSummaryCount] = useState(0)
@@ -197,7 +207,8 @@ const [summaries, setSummaries] = useState<Summary[]>([])
             completed: Boolean(t.completed),
             due_date:t.due_date || undefined,
             priority:t.priority || "medium",
-            context:t.context || ""
+            context:t.context || "",
+            email_id:t.email_id || undefined
           })
         )
 
@@ -282,6 +293,58 @@ const [summaries, setSummaries] = useState<Summary[]>([])
 
   } catch (err) {
     console.error("Failed to delete task", err)
+  }
+}
+
+
+
+
+// const updateTask = async (id: string, updates: {
+//   title: string
+//   due_date?: string
+//   priority?: string
+// }) => {
+//   try {
+//     // Optimistic update
+//     setTasks(prev =>
+//       prev.map(t =>
+//         t.id === id ? { ...t, ...updates } : t
+//       )
+//     )
+
+//     await fetch(`${BACKEND_URL}/tasks/${id}`, {
+//       method: "PATCH",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify(updates)
+//     })
+
+//   } catch (err) {
+//     console.error("Failed to update task", err)
+//   }
+// }
+
+
+const updateTask = async (id: string, updates: {
+  title: string
+  due_date?: string
+  priority?: string
+}) => {
+  try {
+    const res = await fetch(`${BACKEND_URL}/tasks/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates)
+    })
+
+    const updatedTask = await res.json()
+
+
+    setTasks(prev =>
+      prev.map(t => (t.id === id ? updatedTask : t))
+    )
+
+  } catch (err) {
+    console.error("Failed to update task", err)
   }
 }
 
@@ -781,8 +844,8 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
   <div className="flex justify-end mb-4">
     <div className="relative inline-block w-52">
       <select
-        value={taskSort}
-        onChange={(e) => setTaskSort(e.target.value as any)}
+        value={activeTaskSort}
+        onChange={(e) => setActiveTaskSort(e.target.value as typeof activeTaskSort)}
         className="
           w-full
           appearance-none
@@ -835,9 +898,9 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
             pushingTaskId={pushingTaskId}
            pushResult={pushResult}
            onOpenDetails={(task) => setSelectedTask(task)}
-           sortType={taskSort}
+           sortType={activeTaskSort}
            onDelete={deleteTask}
-            // onOpenDetails={openDetails}
+            
           />
           </>
        )} 
@@ -850,6 +913,54 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
         />
 
         {activeSection === 'completed' && (
+          <>
+    <div className="flex justify-end mb-4">
+      <div className="relative inline-block w-52">
+        <select
+          value={completedTaskSort}
+          onChange={(e) =>
+            setCompletedTaskSort(e.target.value as typeof completedTaskSort)
+          }
+          className="
+            w-full
+            appearance-none
+            bg-white dark:bg-zinc-900
+            border border-zinc-300 dark:border-zinc-700
+            text-sm text-zinc-700 dark:text-zinc-200
+            px-4 py-2 pr-10
+            rounded-lg
+            shadow-sm
+            hover:border-zinc-400 dark:hover:border-zinc-500
+            focus:outline-none
+            focus:ring-2 focus:ring-indigo-500/40
+            focus:border-indigo-500
+            transition-all duration-200
+            cursor-pointer
+          "
+        >
+          <option value="default">Default</option>
+          <option value="due_desc">Due Date (new)</option>
+          <option value="due_asc">Due Date (old)</option>
+          <option value="priority_desc">Priority High → Low</option>
+          <option value="priority_asc">Priority Low → High</option>
+        </select>
+
+        <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-zinc-400 dark:text-zinc-500">
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+
+
           <TodoList
             mode="completed"
             tasks={tasks}
@@ -858,13 +969,22 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
             onPush={pushToCalendar}
             pushingTaskId={pushingTaskId}
             pushResult={pushResult}
-            onOpenDetails={openDetails}
-            sortType={taskSort}
+            // onOpenDetails={openDetails}
+            onOpenDetails={(task) => setSelectedTask(task)}
+            sortType={completedTaskSort}
             onDelete={deleteTask}
           />
+          </>
         )}
 
-        {detailsOpen && selectedTask && (
+        {/* { detailsOpen && selectedTask && (
+          <>
+    <div style={{ color: "red", fontSize: "12px" }}>
+      SelectedTask email_id: {selectedTask.email_id}
+      <br />
+      Emails count: {emails.length}
+    </div>
+
   <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
     <div className="bg-white dark:bg-zinc-900 p-5 rounded-xl shadow-lg w-96">
       
@@ -897,11 +1017,45 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
 
     </div>
   </div>
-)}
+  </>
+)} */}
 
 
 
       </main>
+
+      {selectedTask && (
+
+     <>
+   
+
+  <TaskModal
+    task={selectedTask}
+    // email={null}
+    // email={emails.find(e => e.id === selectedTask.email_id)}
+    email={
+  selectedTask.email_id
+    ? emails.find(e => String(e.id) === String(selectedTask.email_id))
+    : undefined
+}
+    onClose={() => setSelectedTask(null)}
+    onUpdate={updateTask}
+  />
+  </>
+
+
+
+
+
+
+)}
+
+
+
+
+
+
+
     </div>
   )
 }

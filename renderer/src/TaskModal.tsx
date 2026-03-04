@@ -4,15 +4,45 @@ type TaskModalProps = {
   task: any
   email: any
   onClose: () => void
+   onUpdate: (id: string, updates: {
+    title: string
+    due_date?: string
+    priority?: string
+  }) => void
 }
 
-export function TaskModal({ task, email, onClose }: TaskModalProps) {
+export function TaskModal({ task, email, onClose,onUpdate }: TaskModalProps) {
+  // if (!task) return null
+
+// const [isEditing, setIsEditing] = React.useState(false)
+// const [title, setTitle] = React.useState(task.title)
+// const [dueDate, setDueDate] = React.useState(
+//   task.due_date ? task.due_date.split("T")[0] : ""
+// )
+// const [priority, setPriority] = React.useState(task.priority || "Medium")
+
+
+const [isEditing, setIsEditing] = React.useState(false)
+  const [title, setTitle] = React.useState("")
+  const [dueDate, setDueDate] = React.useState("")
+  const [priority, setPriority] = React.useState("Medium")
+
+ React.useEffect(() => {
+    if (task) {
+      setTitle(task.title)
+      setDueDate(task.due_date ? task.due_date.split("T")[0] : "")
+      setPriority(task.priority || "Medium")
+    }
+  }, [task])
+
   if (!task) return null
+
+
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
       <div className="bg-white dark:bg-zinc-900 p-5 rounded-xl shadow-xl w-full max-w-lg">
-
+    
         {/* Header */}
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-lg font-semibold text-zinc-800 dark:text-zinc-100">
@@ -23,15 +53,84 @@ export function TaskModal({ task, email, onClose }: TaskModalProps) {
 
         {/* Task Info */}
         <div className="space-y-2 text-sm">
-          <p><strong>Title:</strong> {task.title}</p>
-
-          {task.due_date && (
+          {/* <p><strong>Title:</strong> {task.title}</p> */}
+          <p>
+  <strong>Title:</strong>{" "}
+  {isEditing ? (
+    <input
+      value={title}
+      onChange={e => setTitle(e.target.value)}
+      className="w-full
+    rounded-lg
+    border
+    px-3 py-2
+    bg-white
+    text-zinc-900
+    border-zinc-300
+    focus:outline-none focus:ring-2 focus:ring-blue-500
+    dark:bg-zinc-800
+    dark:text-zinc-100
+    dark:border-zinc-600"
+    />
+  ) : (
+    task.title
+  )}
+</p>
+          {/* {task.due_date && (
             <p><strong>Due Date:</strong> {new Date(task.due_date).toLocaleString()}</p>
-          )}
-
-          {task.priority && (
+          )} */}
+          <p>
+  <strong>Due Date:</strong>{" "}
+  {isEditing ? (
+    <input
+      type="date"
+      value={dueDate}
+      onChange={e => setDueDate(e.target.value)}
+      className="w-full
+    rounded-lg
+    border
+    px-3 py-2
+    bg-white
+    text-zinc-900
+    border-zinc-300
+    focus:outline-none focus:ring-2 focus:ring-blue-500
+    dark:bg-zinc-800
+    dark:text-zinc-100
+    dark:border-zinc-600"
+    />
+  ) : (
+    task.due_date && new Date(task.due_date).toLocaleString()
+  )}
+</p>
+          {/* {task.priority && (
             <p><strong>Priority:</strong> {task.priority}</p>
-          )}
+          )} */}
+            <p>
+  <strong>Priority:</strong>{" "}
+  {isEditing ? (
+    <select
+      value={priority}
+      onChange={e => setPriority(e.target.value)}
+      className="w-full
+    rounded-lg
+    border
+    px-3 py-2
+    bg-white
+    text-zinc-900
+    border-zinc-300
+    focus:outline-none focus:ring-2 focus:ring-blue-500
+    dark:bg-zinc-800
+    dark:text-zinc-100
+    dark:border-zinc-600"
+    >
+      <option value="High">High</option>
+      <option value="Medium">Medium</option>
+      <option value="Low">Low</option>
+    </select>
+  ) : (
+    task.priority
+  )}
+</p>
 
           {task.context && (
             <p><strong>Context:</strong> {task.context}</p>
@@ -57,19 +156,50 @@ export function TaskModal({ task, email, onClose }: TaskModalProps) {
             </p>
           </div>
         )}
-
+        
         {/* Footer actions */}
         <div className="mt-4 text-right">
           {email?.gmail_id && (
             <a
               href={`https://mail.google.com/mail/u/0/#inbox/${email.gmail_id}`}
               target="_blank"
+              rel="noopener noreferrer"
               className="mr-4 text-blue-600"
             >
               Open in Gmail
             </a>
+           
           )}
-          
+          {!task.completed &&(!isEditing ? (
+  <button
+    onClick={() => setIsEditing(true)}
+    className="mr-3 px-3 py-1 rounded bg-blue-600 text-white"
+  >
+    Edit
+  </button>
+) : (
+  <button
+    onClick={() => {
+      onUpdate(task.id, {
+        title,
+        due_date: dueDate ? `${dueDate}T09:00:00` : undefined,
+        priority
+      })
+      setIsEditing(false)
+
+    }}
+    className="mr-3 px-3 py-1 rounded bg-green-600 text-white"
+  >
+    Save
+  </button>
+)
+)}
+
+
+
+
+
+
           <button
             onClick={onClose}
             className="px-3 py-1 rounded bg-zinc-200 dark:bg-zinc-700"
