@@ -1,4 +1,5 @@
 
+import { useState } from "react"
 
 type EmailCardProps = {
   summary: string
@@ -9,10 +10,18 @@ type EmailCardProps = {
 }
 
 export function EmailCard({ summary, confidence, subject, sender, has_attachment }: EmailCardProps) {
+  
+  const [expanded, setExpanded] = useState(false)
+
+  const MAX_LENGTH = 140
+  const isLong = summary.length > MAX_LENGTH
+
+  const shortSummary = summary.slice(0, MAX_LENGTH) + "..."
+
   return (
     <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-700 
                     bg-white dark:bg-zinc-900 shadow-sm transition 
-                    hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-600">
+                    hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-600" onMouseLeave={() => setExpanded(false)}>
 
       {/* SUBJECT + SENDER */}
       <div className="mb-2">
@@ -28,14 +37,31 @@ export function EmailCard({ summary, confidence, subject, sender, has_attachment
 
         {has_attachment && (
           <div className="text-xs mt-1 inline-flex items-center gap-1 text-blue-600 dark:text-blue-400">
-            📎 <span className="font-medium">Attachment</span>
+            📎 <span className="font-medium"> Has Attachment(s)</span>
           </div>
         )}
       </div>
 
       {/* SUMMARY */}
-      <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed mt-1 line-clamp-4">
-        {summary}
+      {/* <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed mt-1 line-clamp-4"> */}
+      <p
+  className={`text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed mt-1 transition-all duration-300 ease-in-out overflow-hidden ${
+    expanded ? "max-h-[500px]" : "max-h-[5.5rem] line-clamp-4"
+  }`}
+>
+        {/* {summary} */}
+          {expanded || !isLong ? summary : shortSummary}
+
+        {isLong && !expanded && (
+          <span
+            onClick={() => setExpanded(true)}
+            className="ml-2 text-blue-600 dark:text-blue-400 cursor-pointer font-medium"
+          >
+            Read more
+          </span>
+        )}    
+
+
       </p>
 
       {/* FOOTER */}
