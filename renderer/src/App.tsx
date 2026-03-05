@@ -65,6 +65,8 @@ const [emailsLoading, setEmailsLoading] = useState(true)
 const [menuOpen, setMenuOpen] = useState(false)
 const [selectedTask, setSelectedTask] = useState<Task | null>(null)
 const [detailsOpen, setDetailsOpen] = useState(false)
+const [showFloatingMenu, setShowFloatingMenu] = useState(false)
+
 
 const openDetails = (task: Task) => {
   setSelectedTask(task)
@@ -91,6 +93,25 @@ const closeDetails = () => {
       listener.subscription.unsubscribe()
     }
   }, [])
+
+  useEffect(() => {
+  const handleScroll = () => {
+    if (window.scrollY > 120) {
+      setShowFloatingMenu(true)
+    } else {
+      setShowFloatingMenu(false)
+    }
+     if (menuOpen) {
+      setMenuOpen(false)
+    }
+
+  }
+
+  window.addEventListener("scroll", handleScroll)
+
+  return () => window.removeEventListener("scroll", handleScroll)
+}, [menuOpen])
+
 
   /* ---------------- UI STATE ---------------- */
   const [darkMode, setDarkMode] = useState(false)
@@ -300,6 +321,15 @@ const updateTask = async (id: string, updates: {
   } catch (err) {
     console.error("Failed to update task", err)
   }
+}
+
+const goToSummaries = () => {
+  setActiveSection("summaries")
+
+  setTimeout(() => {
+    const el = document.getElementById("summaries-section")
+    if (el) el.scrollIntoView({ behavior: "smooth" })
+  }, 100)
 }
 
 
@@ -586,6 +616,7 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
     </div>
 
     {/* Right side - Hamburger Dropdown */}
+    {!showFloatingMenu && (
     <div
       className="relative"
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
@@ -634,9 +665,9 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
         </div>
       )}
     </div>
-
+    )}
   </div>
-)}
+    )}
 
 
 
@@ -674,7 +705,7 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
     {!emailsLoading &&emails.map(email => (
       <div
         key={email.id}
-        className="p-3 rounded-lg border dark:border-zinc-700"
+        className="p-3 rounded-lg border dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition"
       >
         <div className="flex justify-between items-start">
           <div>
@@ -682,17 +713,21 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
             <p className="text-xs text-pink-500">
               {email.sender}
             </p>
+   <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-1">
+  {email.body?.slice(0, 140)}...
+</p>
           </div>
+       
 
-          <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200">
+          <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 ">
             {/* {email.detailed_category} */}
              {email.category}
           </span>
         </div>
 
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300 line-clamp-3">
+        {/* <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300 line-clamp-3">
           {email.body}
-        </p>
+        </p> */}
 
       {email.has_attachment && (
   <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
@@ -720,12 +755,19 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
 
 
        <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
-  Category: {email.category}
-  <span className="opacity-60">•</span>
+  {/* Category: {email.category} */}
+  {/* <span className="opacity-60">•</span> */}
   Confidence: {(email.confidence * 100).toFixed(1)}%
 </p> 
   
+ 
+   <button
+  onClick={goToSummaries}
+  className="mt-2 text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
+>
 
+  View Summary →
+</button>
    
 
 
@@ -744,7 +786,7 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
         />
 
         {activeSection === 'summaries' && (
-          <div className="space-y-3">
+          <div id="summaries-section" className="space-y-3">
             {loading && <p className="text-sm">Loading summaries…</p>}
               
 {summaries.map((s, i) => (
@@ -925,6 +967,58 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
   />
   </>
 )}
+{/* Floating Hamburger Menu */}
+{showFloatingMenu && (
+  <div
+    className="fixed top-20 right-4 z-50"
+    style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+  >
+    <div className="relative">
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          setMenuOpen(!menuOpen)
+        }}
+        className="p-3 rounded-full shadow-lg bg-white dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border dark:border-zinc-700"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5 text-zinc-700 dark:text-zinc-300"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      {menuOpen && (
+        <div className="absolute right-0 mt-2 w-44 rounded-lg shadow-lg bg-white dark:bg-zinc-800 border dark:border-zinc-700 z-50">
+          {[
+            { label: 'Emails', value: 'emails' },
+            { label: 'Summaries', value: 'summaries' },
+            { label: 'Active Tasks', value: 'active' },
+            { label: 'Completed Tasks', value: 'completed' }
+          ].map(item => (
+            <button
+              key={item.value}
+              onClick={(e) => {
+                e.stopPropagation()
+                setActiveSection(item.value as Section)
+                setMenuOpen(false)
+              }}
+              className="block w-full text-left px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-700"
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+)}
+
     </div>
   )
 }
