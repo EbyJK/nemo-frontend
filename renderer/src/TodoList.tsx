@@ -125,7 +125,7 @@ const sortedTasks = [...filteredTasks].sort((a, b) => {
                 <span 
                 onClick={() => onOpenDetails(task)}
                 className={`
-                  font-medium transition-all cursor-pointer hover:underline
+                  font-medium transition-all cursor-pointer hover:underline searchable-text
                   ${task.completed
                     ? "line-through text-zinc-400"
                     : "text-zinc-800 dark:text-zinc-100"
@@ -163,7 +163,7 @@ const sortedTasks = [...filteredTasks].sort((a, b) => {
 
               {/* Context */}
               {task.context && (
-                <span className="text-xs text-zinc-400 italic">
+                <span className="text-xs text-zinc-400 italic searchable-text">
                   {task.context}
                 </span>
               )}
