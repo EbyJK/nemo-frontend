@@ -66,7 +66,9 @@ const [menuOpen, setMenuOpen] = useState(false)
 const [selectedTask, setSelectedTask] = useState<Task | null>(null)
 const [detailsOpen, setDetailsOpen] = useState(false)
 const [showFloatingMenu, setShowFloatingMenu] = useState(false)
-
+const [searchQuery, setSearchQuery] = useState("")
+const [searchMatches, setSearchMatches] = useState<HTMLElement[]>([])
+const [currentMatchIndex, setCurrentMatchIndex] = useState(0)
 
 const openDetails = (task: Task) => {
   setSelectedTask(task)
@@ -111,6 +113,76 @@ const closeDetails = () => {
 
   return () => window.removeEventListener("scroll", handleScroll)
 }, [menuOpen])
+
+
+
+useEffect(() => {
+  if (!searchQuery.trim()) {
+    document
+      .querySelectorAll(".searchable-text")
+      .forEach(el =>
+        el.classList.remove("bg-yellow-200", "dark:bg-yellow-700")
+      )
+    setSearchMatches([])
+    setCurrentMatchIndex(0)
+    return
+  }
+
+  const matches: HTMLElement[] = []
+
+  const elements = document.querySelectorAll(
+    ".searchable-text"
+  )
+
+  elements.forEach(el => {
+    const text = el.textContent?.toLowerCase() || ""
+    if (text.includes(searchQuery.toLowerCase())) {
+      el.classList.add("bg-yellow-200", "dark:bg-yellow-700")
+      matches.push(el as HTMLElement)
+    } else {
+      el.classList.remove("bg-yellow-200", "dark:bg-yellow-700")
+    }
+  })
+
+  setSearchMatches(matches)
+  setCurrentMatchIndex(0)
+
+}, [searchQuery])
+
+const goToMatch = (direction: "next" | "prev") => {
+  if (searchMatches.length === 0) return
+
+  let newIndex = currentMatchIndex
+
+  if (direction === "next") {
+    newIndex = (currentMatchIndex + 1) % searchMatches.length
+  } else {
+    newIndex =
+      (currentMatchIndex - 1 + searchMatches.length) %
+      searchMatches.length
+  }
+
+  setCurrentMatchIndex(newIndex)
+
+  const el = searchMatches[newIndex]
+
+  // el.scrollIntoView({
+  //   behavior: "smooth",
+  //   block: "center"
+  // })
+  searchMatches.forEach(el =>
+  el.classList.remove("ring-2","ring-red-400")
+)
+
+el.classList.add("ring-2","ring-red-400")
+
+el.scrollIntoView({
+  behavior: "smooth",
+  block: "center"
+})
+}
+
+
 
 
   /* ---------------- UI STATE ---------------- */
@@ -607,13 +679,92 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
 
 
 {googleConnected && (
-  <div className="mb-2 flex items-center justify-between">
+  <div className="mb-2 flex items-center justify-between gap-3">
     
     {/* Left side - Connected badge */}
     <div className="inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-green-500 to-emerald-600 px-3 py-1 text-xs font-semibold text-white shadow-md">
+
+
       <span className="h-2 w-2 rounded-full bg-white animate-ping"></span>
       Connected to Google
     </div>
+    {/* SEARCH BAR */}
+{/* <div className="flex items-center gap-2 flex-1 max-w-sm"> */}
+  <div
+className={`
+flex items-center gap-2 flex-1 max-w-sm
+${showFloatingMenu ? 
+"fixed top-3 left-1/2 -translate-x-1/2 z-50 shadow-lg bg-white dark:bg-zinc-900 p-2 rounded-lg" 
+: ""}
+`}
+>
+  
+  <input
+    type="text"
+    placeholder="Search..."
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    onKeyDown={(e) => {
+  if (e.key === "Escape") {
+    setSearchQuery("");
+    setCurrentMatchIndex(0);
+  }
+}}
+    className="
+      w-full
+      px-3 py-1.5
+      text-sm
+      rounded-md
+      border
+      border-zinc-300
+      dark:border-zinc-700
+      bg-white
+      dark:bg-zinc-900
+      text-zinc-700
+      dark:text-zinc-200
+      focus:outline-none
+      focus:ring-2
+      focus:ring-indigo-500
+    "
+  />
+
+
+  {searchMatches.length > 0 && (
+    <div className="flex items-center gap-1 text-xs">
+      
+      <button
+        onClick={() => goToMatch("prev")}
+        className="px-2 py-1 rounded bg-zinc-200 dark:bg-zinc-700"
+      >
+        ↑
+      </button>
+
+      <button
+        onClick={() => goToMatch("next")}
+        className="px-2 py-1 rounded bg-zinc-200 dark:bg-zinc-700"
+      >
+        ↓
+      </button>
+      {searchQuery &&(
+      <button
+        onClick={() => {
+          setSearchQuery("");
+          setCurrentMatchIndex(0);
+        }}
+        className="px-2 py-1 rounded bg-red-200 dark:bg-red-700 text-red-700 dark:text-red-200"
+      >
+        ✕
+      </button>
+    
+)}
+      <span className="text-zinc-500 dark:text-zinc-400">
+        {currentMatchIndex + 1}/{searchMatches.length}
+      </span>
+
+    </div>
+  )}
+
+</div>
 
     {/* Right side - Hamburger Dropdown */}
     {!showFloatingMenu && (
@@ -705,15 +856,16 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
     {!emailsLoading &&emails.map(email => (
       <div
         key={email.id}
+        data-searchable-text={`${email.subject} ${email.sender} ${email.body}`}
         className="p-3 rounded-lg border dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition"
       >
         <div className="flex justify-between items-start">
           <div>
-            <p className="font-medium">{email.subject}</p>
-            <p className="text-xs text-pink-500">
+            <p className="font-medium searchable-text">{email.subject}</p>
+            <p className="text-xs text-pink-500 searchable-text">
               {email.sender}
             </p>
-   <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-1">
+   <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-1 searchable-text">
   {email.body?.slice(0, 140)}...
 </p>
           </div>
@@ -790,6 +942,11 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
             {loading && <p className="text-sm">Loading summaries…</p>}
               
 {summaries.map((s, i) => (
+  <div
+    key={i}
+    // data-searchable-text={`${s.summary} ${s.subject ?? ""} ${s.sender ?? ""}`}
+    className="searchable-text"
+  >
   <EmailCard
     key={i}
     summary={s.summary}
@@ -798,6 +955,7 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
     sender={s.sender}
     has_attachment={s.has_attachment}
   />
+  </div>
 ))}
 
 
