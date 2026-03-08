@@ -224,7 +224,7 @@ const [summaries, setSummaries] = useState<Summary[]>([])
 
 
 
-  /* ---------------- ✅ FETCH FROM BACKEND ---------------- */
+  /* ----------------  FETCH FROM BACKEND ---------------- */
   useEffect(() => {
     if (!user) return
 
