@@ -682,17 +682,31 @@ if (dueDateToSend && !dueDateToSend.includes('T')) {
   <div className="mb-2 flex items-center justify-between gap-3">
     
     {/* Left side - Connected badge */}
-    <div className="inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-green-500 to-emerald-600 px-3 py-1 text-xs font-semibold text-white shadow-md">
+    {/* <div className="inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-green-500 to-emerald-600 px-3 py-1 text-xs font-semibold text-white shadow-md">
 
 
       <span className="h-2 w-2 rounded-full bg-white animate-ping"></span>
       Connected to Google
-    </div>
+    </div> */}
+
+
+
+
+    <div className="flex items-center gap-2">
+      <span className="h-2 w-2 rounded-full bg-blue-700 animate-ping"></span>
+  <img
+    src="https://www.gstatic.com/images/branding/product/1x/gmail_48dp.png"
+    alt="Google Connected"
+    
+    className="h-5 w-5 opacity-90 hover:opacity-100"
+    title="Google Connected"
+  />
+</div>
     {/* SEARCH BAR */}
 {/* <div className="flex items-center gap-2 flex-1 max-w-sm"> */}
   <div
 className={`
-flex items-center gap-2 flex-1 max-w-sm
+flex items-center gap-2 flex-1 max-w-sm min-w-0
 ${showFloatingMenu ? 
 "fixed top-3 left-1/2 -translate-x-1/2 z-50 shadow-lg bg-white dark:bg-zinc-900 p-2 rounded-lg" 
 : ""}
