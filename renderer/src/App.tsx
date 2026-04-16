@@ -47,8 +47,8 @@ type ClassifiedEmail = {
 }
 
 //  NEW: backend URL
-const BACKEND_URL = 'http://127.0.0.1:8000'
-
+// const BACKEND_URL = 'http://127.0.0.1:8000'
+const BACKEND_URL =   'https://nemo-backend-es96.onrender.com'
 export default function App() {
 
   /* ---------------- AUTH ---------------- */

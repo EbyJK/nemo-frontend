@@ -1,5 +1,5 @@
-const BASE_URL = "http://127.0.0.1:8000"; // or 8000 if you used that
-
+// const BASE_URL = "http://127.0.0.1:8000"; // or 8000 if you used that
+const BASE_URL =   "https://nemo-backend-es96.onrender.com"
 export async function fetchSummaries() {
   const res = await fetch(`${BASE_URL}/summaries`);
   if (!res.ok) throw new Error("Failed to fetch summaries");
